@@ -1,0 +1,19 @@
+name: mc-bismuth
+author: PuckiSilver
+version: v1.0.0
+output: build
+require:
+  - bolt
+
+data_pack:
+  load:
+    - libs/mc-magnesium.zip
+    - src
+  name: mc-bismuth
+  description: Library for a spell and catalyst system
+
+pipeline:
+  - mecha
+meta:
+  bolt:
+    entrypoint: bismuth:main

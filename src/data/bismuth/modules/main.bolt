@@ -1,4 +1,6 @@
 
+from bismuth:items import catalyst, spell
+
 append function_tag load:load { "values": [ "bismuth:load" ] }
 
 function bismuth:load:
@@ -11,3 +13,5 @@ function bismuth:tick:
     
     execute store result score gametime bismuth run time query gametime
 
+loot_table bismuth:catalyst/test catalyst(15, 130015)
+loot_table bismuth:spell/test spell(1000, 121000)

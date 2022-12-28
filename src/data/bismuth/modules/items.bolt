@@ -1,0 +1,42 @@
+
+def catalyst(haste, custom_model_data):
+    return {"pools": [{
+        "rolls": 1,
+        "entries": [{
+            "type": "minecraft:item",
+            "name": "minecraft:ender_eye",
+            "functions": [{
+                "function": "minecraft:set_nbt",
+                "tag": f'{{CustomModelData:{custom_model_data},magn:{{spell_haste:{haste}}}}}'
+                },
+                {
+                "function": "minecraft:set_attributes",
+                "modifiers": [{
+                    "attribute": "minecraft:generic.luck",
+                    "name": "tungsten.offhand",
+                    "amount": -0.000000000002,
+                    "operation": "addition",
+                    "id": "0000000c-0000-a455-0000-00000000000b",
+                    "slot": "offhand"
+    }]}]}]}]}
+
+def spell(spell_id, custom_model_data):
+    return {"pools": [{
+      "rolls": 1,
+      "entries": [{
+          "type": "minecraft:item",
+          "name": "minecraft:leather_horse_armor",
+          "functions": [{
+              "function": "minecraft:set_nbt",
+              "tag": f'{{CustomModelData:{custom_model_data},display:{{color:16777215}},magn:{{spell_id:{spell_id}}}}}'
+            },
+            {
+              "function": "minecraft:set_attributes",
+              "modifiers": [{
+                  "attribute": "minecraft:generic.luck",
+                  "name": "tungsten.mainhand",
+                  "amount": -0.000000000002,
+                  "operation": "addition",
+                  "id": "0000000c-0000-a455-0000-00000000000a",
+                  "slot": "mainhand"
+    }]}]}]}]}

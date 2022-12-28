@@ -15,3 +15,9 @@ function bismuth:tick:
 
 loot_table bismuth:catalyst/test catalyst(15, 130015)
 loot_table bismuth:spell/test spell(1000, 121000)
+
+function bismuth:load_catalyst:
+    tag @s remove bismuth.catalyst
+    execute if data storage tungsten:player Item.tag."bismuth.catalyst" run tag @s add bismuth.catalyst
+
+append function_tag tungsten:swap/offhand {"values":["bismuth:load_catalyst"]}

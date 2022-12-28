@@ -11,13 +11,50 @@ function bismuth:load:
 function bismuth:tick:
     schedule function bismuth:tick 1t replace
     
-    execute store result score gametime bismuth run time query gametime
+    execute store result score .gametime bismuth run time query gametime
 
 loot_table bismuth:catalyst/test catalyst(15, 130015)
 loot_table bismuth:spell/test spell(1000, 121000)
+loot_table bismuth:spell/test2 spell(1002, 121002)
 
 function bismuth:load_catalyst:
     tag @s remove bismuth.catalyst
     execute if data storage tungsten:player Item.tag."bismuth.catalyst" run tag @s add bismuth.catalyst
 
 append function_tag tungsten:swap/offhand {"values":["bismuth:load_catalyst"]}
+
+advancement bismuth:use_spell
+    {
+    "criteria": {
+        "requirement": {
+        "trigger": "minecraft:using_item",
+        "conditions": {
+            "player": [
+                { "condition": "minecraft:value_check",
+                    "value": { "type": "minecraft:score", "target": { "type": "minecraft:fixed", "name": ".gametime" }, "score": "bismuth" },
+                    "range": {
+                        "min": { "type": "minecraft:score", "target": "this", "score": "magn.cd_until.mainhand" },
+                        "max": 2147483647 } },
+                { "condition": "minecraft:inverted", "term": { "condition": "minecraft:value_check",
+                    "value": { "type": "minecraft:score", "target": "this", "score": "magn.spell_id.mainhand" },
+                    "range": 0 } },
+                { "condition": "minecraft:entity_properties", "entity": "this",
+                    "predicate": { "nbt": "{Tags:[\"bismuth.catalyst\"]}" } }
+            ],
+            "item": { "items": [ "minecraft:ender_eye" ] }
+        }}},
+    "rewards": { "function": "bismuth:use_spell" }
+    }
+
+function bismuth:use_spell:
+    advancement revoke @s only bismuth:use_spell
+
+    scoreboard players operation .spell_id bismuth = @s magn.spell_id.mainhand
+    function #bismuth:spell_dictionary
+
+function_tag bismuth:spell_dictionary {"values":[]}
+append function_tag bismuth:spell_dictionary {"values":["bismuth:test_spell"]}
+
+function bismuth:test_spell:
+    execute if score .spell_id bismuth matches 1000 run say SPELL 1k
+    execute if score .spell_id bismuth matches 1002 run say TESTING this SPELL btch

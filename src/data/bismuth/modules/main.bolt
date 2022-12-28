@@ -2,4 +2,12 @@
 append function_tag load:load { "values": [ "bismuth:load" ] }
 
 function bismuth:load:
-    say BISMUTH LOADED
+    schedule function bismuth:tick 1t replace
+    
+    scoreboard objectives add bismuth dummy
+
+function bismuth:tick:
+    schedule function bismuth:tick 1t replace
+    
+    execute store result score gametime bismuth run time query gametime
+

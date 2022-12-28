@@ -7,6 +7,9 @@ function bismuth:load:
     schedule function bismuth:tick 1t replace
     
     scoreboard objectives add bismuth dummy
+    scoreboard players set #2 bismuth 2
+    scoreboard players set #16384 bismuth 16384
+    scoreboard players set #12000 bismuth 12000
 
 function bismuth:tick:
     schedule function bismuth:tick 1t replace
@@ -49,12 +52,77 @@ advancement bismuth:use_spell
 function bismuth:use_spell:
     advancement revoke @s only bismuth:use_spell
 
+    execute store result score .this_spell_id bismuth run data get entity @s SelectedItem.tag.magn.spell_id
     scoreboard players operation .spell_id bismuth = @s magn.spell_id.mainhand
-    function #bismuth:spell_dictionary
+
+    execute if score .this_spell_id bismuth = .spell_id bismuth function #bismuth:spell_dictionary
 
 function_tag bismuth:spell_dictionary {"values":[]}
 append function_tag bismuth:spell_dictionary {"values":["bismuth:test_spell"]}
 
 function bismuth:test_spell:
-    execute if score .spell_id bismuth matches 1000 run say SPELL 1k
-    execute if score .spell_id bismuth matches 1002 run say TESTING this SPELL btch
+    execute if score .spell_id bismuth matches 1000 run function bismuth:spell/1000_testing_spell
+    execute if score .spell_id bismuth matches 1002 run say SPELL 1002
+
+function bismuth:spell/1000_testing_spell:
+    say PEW PEW SPELL 1000 PEW PEW
+    scoreboard players set .cooldown bismuth 116
+    function bismuth:set_cooldown
+
+function bismuth:set_cooldown:
+    # SET:  .cooldown bismuth => base cooldown
+    # IN:   @s magn.spell_haste
+    #       .gametime bismuth
+
+    # cd_div = ( 100 + spell_haste )
+    scoreboard players set .cd_div bismuth 100
+    scoreboard players operation .cd_div bismuth += @s magn.spell_haste
+
+    # cd_until = ( ( cooldown * 100 ) / cd_div ) * gametime
+    # with rounding
+    scoreboard players set .cd_until bismuth 100
+    scoreboard players operation .cd_until bismuth *= .cooldown bismuth
+    scoreboard players operation .cd_until bismuth += .cd_until bismuth
+    scoreboard players operation .cd_until bismuth /= .cd_div bismuth
+    scoreboard players operation #temp bismuth = .cd_until bismuth
+    scoreboard players operation .cd_until bismuth /= #2 bismuth
+    scoreboard players operation #temp bismuth %= #2 bismuth
+    scoreboard players operation .cd_until bismuth += #temp bismuth
+    scoreboard players operation .cd_until bismuth += .gametime bismuth
+
+    # cd_tint_upper = ( 100_000 / cd_div ) * 16384
+    # with rounding
+    scoreboard players set .cd_tint_upper bismuth 200000
+    scoreboard players operation .cd_tint_upper bismuth /= .cd_div bismuth
+    scoreboard players operation #temp bismuth = .cd_tint_upper bismuth
+    scoreboard players operation .cd_tint_upper bismuth /= #2 bismuth
+    scoreboard players operation #temp bismuth %= #2 bismuth
+    scoreboard players operation .cd_tint_upper bismuth += #temp bismuth
+    scoreboard players operation .cd_tint_upper bismuth *= #16384 bismuth
+
+    # cd_tint += ( cd_until / 2 ) + cd_tint_upper
+    scoreboard players operation .cd_tint bismuth = .cd_until bismuth
+    scoreboard players operation .cd_tint bismuth /= #2 bismuth
+    scoreboard players operation .cd_tint bismuth %= #12000 bismuth
+    scoreboard players operation .cd_tint bismuth += .cd_tint_upper bismuth
+
+    data remove storage bismuth:cd item
+    execute store result storage bismuth:cd item.tag.magn.cd_until int 1 run scoreboard players get .cd_until bismuth
+    execute store result storage bismuth:cd item.tag.display.color int 1 run scoreboard players get .cd_tint bismuth
+    
+    scoreboard players operation @s magn.cd_until -= @s magn.cd_until.mainhand
+    scoreboard players operation @s magn.cd_until.mainhand = .cd_until bismuth
+    scoreboard players operation @s magn.cd_until += @s magn.cd_until.mainhand
+
+    item modify entity @s weapon.mainhand bismuth:set_cooldown
+
+item_modifier bismuth:set_cooldown {
+        "function": "minecraft:copy_nbt",
+        "source": {
+            "type": "minecraft:storage",
+            "source": "bismuth:cd" },
+        "ops": [ {
+            "source": "item.tag",
+            "target": "{}",
+            "op": "merge" }
+    ]}

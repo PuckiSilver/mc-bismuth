@@ -5,6 +5,7 @@ append function_tag load:load { "values": [ "bismuth:load" ] }
 
 function bismuth:load:
     schedule function bismuth:tick 1t replace
+    schedule function bismuth:clear_cool_down 300s replace
     
     scoreboard objectives add bismuth dummy
     scoreboard players set #2 bismuth 2
@@ -33,11 +34,11 @@ advancement bismuth:use_spell
         "trigger": "minecraft:using_item",
         "conditions": {
             "player": [
-                { "condition": "minecraft:value_check",
+                { "condition": "minecraft:inverted", "term": { "condition": "minecraft:value_check",
                     "value": { "type": "minecraft:score", "target": { "type": "minecraft:fixed", "name": ".gametime" }, "score": "bismuth" },
                     "range": {
-                        "min": { "type": "minecraft:score", "target": "this", "score": "magn.cd_until.mainhand" },
-                        "max": 2147483647 } },
+                        "min": -2147483648,
+                        "max": { "type": "minecraft:score", "target": "this", "score": "magn.cd_until.mainhand" } } } },
                 { "condition": "minecraft:inverted", "term": { "condition": "minecraft:value_check",
                     "value": { "type": "minecraft:score", "target": "this", "score": "magn.spell_id.mainhand" },
                     "range": 0 } },
@@ -67,9 +68,9 @@ function bismuth:test_spell:
 function bismuth:spell/1000_testing_spell:
     say PEW PEW SPELL 1000 PEW PEW
     scoreboard players set .cooldown bismuth 116
-    function bismuth:set_cooldown
+    function bismuth:set_cool_down
 
-function bismuth:set_cooldown:
+function bismuth:set_cool_down:
     # SET:  .cooldown bismuth => base cooldown
     # IN:   @s magn.spell_haste
     #       .gametime bismuth
@@ -114,9 +115,9 @@ function bismuth:set_cooldown:
     scoreboard players operation @s magn.cd_until.mainhand = .cd_until bismuth
     scoreboard players operation @s magn.cd_until += @s magn.cd_until.mainhand
 
-    item modify entity @s weapon.mainhand bismuth:set_cooldown
+    item modify entity @s weapon.mainhand bismuth:set_cool_down
 
-item_modifier bismuth:set_cooldown {
+item_modifier bismuth:set_cool_down {
         "function": "minecraft:copy_nbt",
         "source": {
             "type": "minecraft:storage",
@@ -126,3 +127,20 @@ item_modifier bismuth:set_cooldown {
             "target": "{}",
             "op": "merge" }
     ]}
+
+function bismuth:clear_cool_down:
+    schedule function bismuth:clear_cool_down 300s replace
+    execute as @a run function bismuth:clear_cool_down_self
+
+function bismuth:clear_cool_down_self:
+    for i in range(9):
+        execute store result score #cd_until bismuth run data get entity @s f'Inventory[{{Slot:{i}b}}].tag.magn.cd_until'
+        execute unless score #cd_until bismuth matches 0 if score .gametime bismuth > #cd_until bismuth run item modify entity @s f'hotbar.{i}' bismuth:clear_cool_down
+    for i in range(27):
+        execute store result score #cd_until bismuth run data get entity @s f'Inventory[{{Slot:{i+9}b}}].tag.magn.cd_until'
+        execute unless score #cd_until bismuth matches 0 if score .gametime bismuth > #cd_until bismuth run item modify entity @s f'inventory.{i}' bismuth:clear_cool_down
+
+item_modifier bismuth:clear_cool_down {
+        "function": "minecraft:set_nbt",
+        "tag": "{display:{color:16777215},magn:{cd_until:0}}"
+    }

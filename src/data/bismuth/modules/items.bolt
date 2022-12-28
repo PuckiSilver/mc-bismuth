@@ -28,7 +28,7 @@ def spell(spell_id, custom_model_data):
           "name": "minecraft:leather_horse_armor",
           "functions": [{
               "function": "minecraft:set_nbt",
-              "tag": f'{{CustomModelData:{custom_model_data},display:{{color:16777215}},magn:{{cd_until:-2147483648,spell_id:{spell_id}}}}}'
+              "tag": f'{{CustomModelData:{custom_model_data},display:{{color:16777215}},magn:{{cd_until:0,spell_id:{spell_id}}}}}'
             },
             {
               "function": "minecraft:set_attributes",

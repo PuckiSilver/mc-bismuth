@@ -108,7 +108,7 @@ function bismuth:cool_down/set:
     scoreboard players set .cd_div bismuth 100
     scoreboard players operation .cd_div bismuth += @s magn.spell_haste
 
-    # cd_until = ( ( cooldown * 100 ) / cd_div ) * gametime
+    # cd_until = ( ( cooldown * 100 ) / cd_div ) + gametime
     # with rounding
     scoreboard players set .cd_until bismuth 100
     scoreboard players operation .cd_until bismuth *= .cooldown bismuth

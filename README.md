@@ -3,6 +3,8 @@ This projects adds a robust dynamic spell casting system.
 
 Use a catalyst in your offhand to cast a spell from an item in your mainhand.
 
+For this data pack to work, the vanilla ender eye behavior has been disabled, so you can't use them to find the stronghold.
+
 This library shows cool down visually using the [mc-silica](https://github.com/PuckiSilver/mc-silica) resource pack.
 
 ## **Prerequisites**

@@ -5,7 +5,7 @@ append function_tag load:load { "values": [ "bismuth:load" ] }
 
 function bismuth:load:
     schedule function bismuth:tick 1t replace
-    schedule function bismuth:clear_cool_down 300s replace
+    schedule function bismuth:cool_down/clear 300s replace
     
     scoreboard objectives add bismuth dummy
     scoreboard players set #2 bismuth 2
@@ -18,9 +18,9 @@ function bismuth:tick:
     schedule function bismuth:tick 1t replace
     
     execute store result score .gametime bismuth run time query gametime
-    execute as @a[scores={bismuth.charge=1..}] run function bismuth:charge_tick
+    execute as @a[scores={bismuth.charge=1..}] run function bismuth:charge/tick
 
-function bismuth:charge_tick:
+function bismuth:charge/tick:
     scoreboard players add @s bismuth.prev_charge 1
 
     scoreboard players reset .this_spell_id bismuth
@@ -29,29 +29,18 @@ function bismuth:charge_tick:
         store result score .this_spell_id bismuth
         run data get entity @s SelectedItem.tag.magn.spell_id
     execute if score .this_spell_id bismuth = @s magn.spell_id.mainhand
-        run function bismuth:charge_tick_1:
+        run function bismuth:charge/branch:
             scoreboard players operation .spell_id bismuth = @s magn.spell_id.mainhand
             scoreboard players set .finished bismuth 1
             function #bismuth:spell_dictionary
             scoreboard players reset @s bismuth.prev_charge
             scoreboard players reset @s bismuth.charge
 
-loot_table bismuth:catalyst/test catalyst(15, 130015)
-loot_table bismuth:catalyst/test2 catalyst(200, 130016)
-loot_table bismuth:spell/test spell(1000, 121000)
-loot_table bismuth:spell/test2 spell(1002, 121002)
-loot_table bismuth:spell/test3 spell(1003, 121003)
-
-function bismuth:load_catalyst:
+function bismuth:hold_catalyst:
     tag @s remove bismuth.catalyst
     execute if data storage tungsten:player Item.tag."bismuth.catalyst" run tag @s add bismuth.catalyst
 
-append function_tag tungsten:swap/offhand {"values":["bismuth:load_catalyst"]}
-
-function bismuth:reset_charge:
-    scoreboard players reset @s bismuth.charge
-
-append function_tag tungsten:swap/mainhand {"values":["bismuth:reset_charge"]}
+append function_tag tungsten:swap/offhand {"values":["bismuth:hold_catalyst"]}
 
 advancement bismuth:use_spell
     {
@@ -89,28 +78,28 @@ function bismuth:use_spell:
     execute if score .this_spell_id bismuth = .spell_id bismuth run function #bismuth:spell_dictionary
 
 function_tag bismuth:spell_dictionary {"values":[]}
-append function_tag bismuth:spell_dictionary {"values":["bismuth:test_spell"]}
+append function_tag bismuth:spell_dictionary {"values":["bismuth:template_spell_dictionary"]}
 
-function bismuth:test_spell:
+function bismuth:template_spell_dictionary:
     execute if score .spell_id bismuth matches 1000 run function bismuth:spell/1000/testing_spell:
         say PEW PEW SPELL 1000 PEW PEW
         scoreboard players set .cooldown bismuth 116
-        function bismuth:set_cool_down
+        function bismuth:cool_down/set
     execute if score .spell_id bismuth matches 1002 run function bismuth:spell/1002/testing_spell:
         if score .finished bismuth matches 0 run say Charging
         if score .finished bismuth matches 1 run say PAPAPEWWWW
         if score .finished bismuth matches 1 run scoreboard players set .cooldown bismuth 116
-        if score .finished bismuth matches 1 run function bismuth:set_cool_down
+        if score .finished bismuth matches 1 run function bismuth:cool_down/set
     execute if score .spell_id bismuth matches 1003 if score @s bismuth.charge matches 100.. run function bismuth:spell/1003/max_charge:
         say charged 5 seconds
         scoreboard players set .cooldown bismuth 116
-        function bismuth:set_cool_down
+        function bismuth:cool_down/set
     execute if score .spell_id bismuth matches 1003 unless score @s bismuth.charge matches 100.. if score .finished bismuth matches 1 run function bismuth:spell/1003/break_charge:
         say stopped in charge
         scoreboard players set .cooldown bismuth 29
-        function bismuth:set_cool_down
+        function bismuth:cool_down/set
 
-function bismuth:set_cool_down:
+function bismuth:cool_down/set:
     # SET:  .cooldown bismuth => base cooldown
     # IN:   @s magn.spell_haste
     #       .gametime bismuth
@@ -169,11 +158,11 @@ item_modifier bismuth:set_cool_down {
             "op": "merge" }
     ]}
 
-function bismuth:clear_cool_down:
-    schedule function bismuth:clear_cool_down 300s replace
-    execute as @a run function bismuth:clear_cool_down_self
+function bismuth:cool_down/clear:
+    schedule function bismuth:cool_down/clear 300s replace
+    execute as @a run function bismuth:cool_down/clear_self
 
-function bismuth:clear_cool_down_self:
+function bismuth:cool_down/clear_self:
     for i in range(9):
         execute store result score #cd_until bismuth run data get entity @s f'Inventory[{{Slot:{i}b}}].tag.magn.cd_until'
         execute unless score #cd_until bismuth matches 0 if score .gametime bismuth > #cd_until bismuth run item modify entity @s f'hotbar.{i}' bismuth:clear_cool_down

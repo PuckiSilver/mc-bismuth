@@ -40,3 +40,9 @@ def spell(spell_id, custom_model_data):
                   "id": "0000000c-0000-a455-0000-00000000000a",
                   "slot": "mainhand"
     }]}]}]}]}
+
+loot_table bismuth:catalyst/test catalyst(15, 130015)
+loot_table bismuth:catalyst/test2 catalyst(200, 130016)
+loot_table bismuth:spell/test spell(1000, 121000)
+loot_table bismuth:spell/test2 spell(1002, 121002)
+loot_table bismuth:spell/test3 spell(1003, 121003)

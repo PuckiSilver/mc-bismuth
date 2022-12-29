@@ -42,6 +42,8 @@ function bismuth:hold_catalyst:
 
 append function_tag tungsten:swap/offhand {"values":["bismuth:hold_catalyst"]}
 
+worldgen_structure_tag minecraft:eye_of_ender_located {"values":[],"replace":true}
+
 advancement bismuth:use_spell
     {
     "criteria": {
